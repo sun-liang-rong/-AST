@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function myAST(HTML){ 
+            //创建一个指针
+            var idx = 0
+            //创建两个栈
+            var stack1 = []
+            var stack2 = []
+            //循环语句
+        while(idx < HTML.length){
+            //剩余部分
+            let rest = HTML.substring(idx)
+            //这里检测匹配到的不是换行,空喊,\S 就是换行或者空格的意思
+            if(!/\s+/.test(rest[0])){
+                //匹配开始标签
+
+                if(/^\<[a-z0-9]+\>/.test(rest)){
+                    //找到开始标签
+                    let fullTag = rest.match(/\<([a-z0-9]+)\>/)[0]
+                    let tagName = rest.match(/\<([a-z0-9]+)\>/)[1]
+                    idx += fullTag.length
+                    //对栈操作
+                    stack1.push(tagName)
+                    stack2.push({
+                        tag:tagName,
+                        children:[]
+                    }) 
+                }else if(/^[^\<]+\</.test(rest)){
+                    //找到内容
+                    let reg = /([^\<]+)\</
+                    let text1 = rest.match(reg)[1].trim()
+                    idx += text1.length
+                    //对栈操作
+                    stack2[stack2.length-1].children.push({text:text1})
+                }else if(/^\<\/[a-z0-9]+\>/.test(rest)){
+                    //找到结束标签
+                    let reg = /\<\/([a-z0-9]+)\>/
+                    let Tag1 = rest.match(reg)[0]
+                    let endTag = rest.match(reg)[1]
+                    
+                    idx += Tag1.length
+                    //对栈操作
+                    if(stack2.length > 1){
+                        newValue = stack1.pop() 
+                        newItem = stack2.pop()
+                        stack2[stack2.length-1].children.push(newItem)
+                    }else{
+                        // 遍历到最后返回结果
+                        return stack2[0] 
+                        break
+                    }
+                }
+            }else{
+                //当剩余部分第0个字符串空串,即指针指向空字符串,那么什么都保护用做
+                idx++
+            }
+            
+            
+        }
+            
+           
+    }
+        var result = myAST(`
+            <section>
+                <h3>我是一个标题</h3>
+                <div>
+                    <h4>我也是一个标题</h4>
+                    <ul>
+                        <li>
+                            我是散装文字
+                            <p>我是段落</p>
+                        </li>
+                        <li>
+                            文字
+                        </li>
+                        <li>
+                            文字
+                        </li>
+                    </ul>
+                </div>   
+            </section>
+        `)
+        
+        console.log(result);
+    </script>
+</body>
+</html>
